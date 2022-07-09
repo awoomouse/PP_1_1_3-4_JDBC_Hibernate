@@ -1,38 +1,55 @@
 package jm.task.core.jdbc.util;
 
-import java.lang.reflect.InvocationTargetException;
+import jm.task.core.jdbc.model.User;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
+import org.hibernate.service.ServiceRegistry;
+
 import java.sql.*;
+import java.util.Properties;
 
 public class Util {
-    private static final String url = "jdbc:mysql://localhost:3306/test";
-    private static final String user = "root";
-    private static final String password = "root";
+    private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
+    private static final String URL = "jdbc:mysql://localhost:3306/test";
+    private static final String USERNAME = "root";
+    private static final String PASSWORD = "root";
 
     private static Connection connection;
 
-//    public static void main(String[] args) {
-//        try {
-//            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-//            connection = DriverManager.getConnection(url, user, password);
-//            Statement st = connection.createStatement();
-//            String sqlCommandCreate = "CREATE TABLE user_table (Id INT PRIMARY KEY AUTO_INCREMENT, user_name VARCHAR(20), user_lastname VARCHAR(30), user_age INT)";
-//            String sqlCommand = "DROP TABLE user_table";
-//            st.executeUpdate(sqlCommand);
-//            connection.close();
-//            System.out.println("done!");
-//        } catch (SQLException e) {
-//            System.out.println("sql except");
-//        } catch (ClassNotFoundException e) {
-//            System.out.println("class not found");
-//        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | InstantiationException e) {
-//            System.out.println("chto-to sluchilos' s Class.forname()");
-//        }
-//    }
+    public static SessionFactory sessionFactory;
+
     public static Connection getCon() {
         try {
-            return connection = DriverManager.getConnection(url, user, password);
+            return connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
         } catch (SQLException ex) {
         }
         return connection;
+    }
+    public static SessionFactory getSessionFactory() {
+        if (sessionFactory == null) {
+            Configuration configuration = new Configuration();
+            Properties settings = new Properties();
+
+            settings.put(Environment.DRIVER, DRIVER);
+            settings.put(Environment.URL, URL);
+            settings.put(Environment.USER, USERNAME);
+            settings.put(Environment.PASS, PASSWORD);
+            settings.put(Environment.DIALECT, "org.hibernate.dialect.MySQLDialect");
+            settings.put(Environment.SHOW_SQL, "true");
+            settings.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+            settings.put(Environment.HBM2DDL_AUTO, "create-drop");
+
+            configuration.setProperties(settings);
+            configuration.addAnnotatedClass(User.class);
+
+            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                    .applySettings(configuration.getProperties()).build();
+
+            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+        }
+        return sessionFactory;
     }
 }
