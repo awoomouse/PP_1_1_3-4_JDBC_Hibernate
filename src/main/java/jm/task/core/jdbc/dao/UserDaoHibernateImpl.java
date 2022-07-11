@@ -19,9 +19,9 @@ public class UserDaoHibernateImpl implements UserDao {
     public void createUsersTable() {
         session = getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
-        String hql = "CREATE TABLE user_table (Id bigint PRIMARY KEY AUTO_INCREMENT, user_name VARCHAR(20), user_lastname VARCHAR(30), user_age INT)";
+        String sql = "CREATE TABLE user_table (Id bigint PRIMARY KEY AUTO_INCREMENT, user_name VARCHAR(20), user_lastname VARCHAR(30), user_age INT)";
 
-        session.createSQLQuery(hql).addEntity(User.class).executeUpdate();
+        session.createSQLQuery(sql).addEntity(User.class).executeUpdate();
 
         transaction.commit();
         session.close();
